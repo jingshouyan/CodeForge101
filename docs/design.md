@@ -285,3 +285,57 @@ src/
 8. ~~**是否要代码导出**~~ ✅ 已定：后置；渲染器保持纯净（数据层 adapter 注入），为导出铺路
 
 **明确后置（不进 P1）**：组织架构/部门（审批按部门选人）、审计日志、邮件/IM 通知、数据导入导出、PDF 打印、多人实时协作
+
+## 12. 工程结构（M1 落地）
+
+### 12.1 仓库布局
+
+```
+├── docs/                    # 设计文档
+│   ├── design.md            # 方案设计（本文）
+│   └── detailed-design.md   # 详细设计
+├── backend/                 # Go + Gin + GORM
+│   ├── cmd/server/          # 入口：连接 DB → 迁移 → 种子 → 路由
+│   └── internal/
+│       ├── config/          # 环境变量（PORT / DATABASE_URL / JWT_SECRET）
+│       ├── database/        # GORM 连接、AutoMigrate、admin 种子
+│       ├── model/           # GORM 模型（User/App/AppMember/AppPage）
+│       ├── dto/             # 统一响应 {code,message,data}、请求/响应结构
+│       ├── middleware/      # JWT 校验（Bearer token → uid/role 注入 context）
+│       ├── handler/         # HTTP 层（参数绑定、状态码映射）
+│       ├── service/         # 业务层（owner 权限、乐观锁、schema 校验）
+│       └── router/          # 路由注册
+└── frontend/                # React + Vite + Tailwind v4
+    └── src/
+        ├── schema/types.ts  # SchemaNode/PropValue/EventAction 类型（与详细设计对应）
+        ├── api/             # axios 封装（token 注入、401 跳转、统一解包）+ 各域 API
+        ├── stores/          # zustand（auth）
+        ├── pages/           # LoginPage、admin/*（管理端）、runtime/*（运行时）
+        └── runtime/         # registry（组件注册表）+ RuntimeRenderer（递归渲染）
+```
+
+### 12.2 数据库与部署（M1 实际落地）
+
+- 开发库：WSL Docker 容器 `postgres16`（postgres:16-alpine，0.0.0.0:5432），Windows 端经 WSL2 端口转发直连
+- 连接串：环境变量 `DATABASE_URL`（默认 `postgres://code_forge101:abcd1234@localhost:5432/code_forge101`）
+- 平台表：M1 迁移 users / apps / app_members / app_pages 四张；app_releases、data_models、workflow_* 随里程碑加入
+- 启动：`go -C backend run ./cmd/server`（8080）；`npm --prefix frontend run dev`（5173，/api 代理到 8080）
+- M1 未做 go:embed（M6 发布里程碑一并落地）
+
+### 12.3 与详细设计的偏差（M1 简化）
+
+| 项 | 详细设计 | M1 实际 | 说明 |
+| --- | --- | --- | --- |
+| 前端数据请求 | TanStack Query | 原生 useEffect + axios | M3 数据组件引入后再上 Query |
+| CORS | 未列 | 未配置 | 开发期走 Vite 代理同源；生产 go:embed 同源 |
+| apps.menu | JSONB 字段 | 表字段已建，接口后置 | M2 设计器做菜单配置 |
+| 用户管理 | /users CRUD | 仅种子 admin | M5 权限里程碑补 |
+| App 权限 | 成员表角色 | owner/admin 两级 | app_members 表已建，接口 M5 补 |
+
+### 12.4 验证记录（M1）
+
+- 登录 → 返回 token，`/auth/me` 正常
+- 建应用 → 建页面（JSON schema）→ 更新（版本 1→2）→ 乐观锁冲突（旧版本提交返回 400）
+- 无 token 访问 → 401
+- 前端 `tsc + vite build` 通过；dev server 200；`/api` 代理链路通
+- 浏览器人工验证：http://localhost:5173（admin / admin123）
