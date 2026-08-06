@@ -77,9 +77,9 @@ props 支持三种值：
 
 | 形式 | 示例 | 说明 |
 | --- | --- | --- |
-| 字面量 | `"disabled": false` | 静态值 |
-| 数据绑定 | `"value": "$model.order.status"` | 绑定到页面数据 |
-| 表达式 | `"visible": "{{ $model.status === 'closed' }}"` | v1 仅支持简单比较/逻辑 |
+| 字面量 | `{"kind": "literal", "value": false}` | 静态值 |
+| 数据绑定 | `{"kind": "binding", "path": "$model.order.status"}` | 绑定到页面数据 |
+| 表达式 | `{"kind": "expr", "expr": "$model.status === 'closed'"}` | v1 仅支持简单比较/逻辑 |
 
 示例（订单列表页）：
 
