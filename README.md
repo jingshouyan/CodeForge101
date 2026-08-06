@@ -15,7 +15,7 @@
 ## 启动步骤
 
 1. **数据库**：确保 WSL 中 PG 容器在跑：`wsl docker ps`（应看到 `postgres16`）。连接串默认 `postgres://code_forge101:abcd1234@localhost:5432/code_forge101`，可用环境变量 `DATABASE_URL` 覆盖
-2. **后端**（端口 8080）：`go -C backend run ./cmd/server`——首次启动自动建表并创建 admin 账号
+2. **后端**（端口 8080）：`go -C backend run ./cmd/server`——首次启动自动建表并创建 admin 账号。配置优先级：环境变量 > `backend/config.yaml`（可选，参考 `config.example.yaml`）> 默认值
 3. **前端**（端口 5173）：`npm --prefix frontend run dev`，访问 http://localhost:5173
 4. **登录**：admin / admin123（请尽快修改）
 

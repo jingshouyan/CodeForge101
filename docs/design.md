@@ -297,7 +297,7 @@ src/
 ├── backend/                 # Go + Gin + GORM
 │   ├── cmd/server/          # 入口：连接 DB → 迁移 → 种子 → 路由
 │   └── internal/
-│       ├── config/          # 环境变量（PORT / DATABASE_URL / JWT_SECRET）
+│       ├── config/          # viper：默认值 + config.yaml（可选）+ 环境变量覆盖
 │       ├── database/        # GORM 连接、AutoMigrate、admin 种子
 │       ├── model/           # GORM 模型（User/App/AppMember/AppPage）
 │       ├── dto/             # 统一响应 {code,message,data}、请求/响应结构

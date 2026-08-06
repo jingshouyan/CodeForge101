@@ -9,7 +9,10 @@ import (
 )
 
 func main() {
-	cfg := config.Load()
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("配置加载失败: %v", err)
+	}
 
 	db, err := database.Connect(cfg.DBURL)
 	if err != nil {
@@ -22,7 +25,7 @@ func main() {
 		log.Fatalf("种子数据失败: %v", err)
 	}
 
-	r := router.New(db, cfg)
+	r := router.New(db, *cfg)
 	log.Printf("服务启动: http://localhost:%s", cfg.Port)
 	if err := r.Run(":" + cfg.Port); err != nil {
 		log.Fatalf("服务启动失败: %v", err)
