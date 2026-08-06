@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { createApp, listApps } from '../../api/apps'
 import type { App } from '../../api/types'
 

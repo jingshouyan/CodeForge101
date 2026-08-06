@@ -1,4 +1,4 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom'
+import { Link, Outlet, useNavigate } from 'react-router'
 import { useAuthStore } from '../../stores/auth'
 
 export default function AdminLayout() {

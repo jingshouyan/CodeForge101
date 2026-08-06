@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { useAuthStore } from './stores/auth'
 import LoginPage from './pages/LoginPage'
 import AdminLayout from './pages/admin/AdminLayout'

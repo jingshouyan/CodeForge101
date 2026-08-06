@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router'
 import { getApp } from '../../api/apps'
 import { listPages } from '../../api/pages'
 import type { App, AppPage } from '../../api/types'
