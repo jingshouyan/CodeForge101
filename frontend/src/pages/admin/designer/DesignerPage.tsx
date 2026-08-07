@@ -4,7 +4,7 @@ import { getApp } from '../../../api/apps'
 import { getPage, updatePage } from '../../../api/pages'
 import type { App, AppPage } from '../../../api/types'
 import { useDesignerStore } from '../../../designer/store'
-import { clearDraft, writeDraft } from '../../../designer/draft'
+import { clearDraft, readDraft, writeDraft } from '../../../designer/draft'
 import { Palette } from './Palette'
 import { Canvas } from './Canvas'
 import { Inspector } from './Inspector'
@@ -28,6 +28,7 @@ export default function DesignerPage() {
   const redo = useDesignerStore((s) => s.redo)
   const canUndo = useDesignerStore((s) => s.past.length > 0)
   const canRedo = useDesignerStore((s) => s.future.length > 0)
+  const [draftRestored, setDraftRestored] = useState(false)
 
   useEffect(() => {
     if (!appId || !pageId) return
@@ -36,12 +37,22 @@ export default function DesignerPage() {
         const [appRes, pageRes] = await Promise.all([getApp(appId), getPage(appId, pageId)])
         setApp(appRes)
         setPage(pageRes)
-        load(JSON.parse(pageRes.schema))
+        // 存在未保存草稿（上次预览写的）时恢复，否则加载服务端 schema
+        const draft = readDraft(appId, pageId)
+        load(draft ?? JSON.parse(pageRes.schema))
+        setDraftRestored(draft !== null)
       } catch (err) {
         setError(err instanceof Error ? err.message : '加载失败')
       }
     })()
   }, [appId, pageId, load])
+
+  function discardDraft() {
+    if (!appId || !pageId || !page) return
+    clearDraft(appId, pageId)
+    load(JSON.parse(page.schema))
+    setDraftRestored(false)
+  }
 
   // 快捷键：Delete 删除选中；Ctrl+Z / Ctrl+Shift+Z 撤销/重做（输入框内不触发）
   useEffect(() => {
@@ -74,6 +85,7 @@ export default function DesignerPage() {
       setPage(updated)
       setSavedAt(Date.now())
       clearDraft(appId!, String(page.id))
+      setDraftRestored(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : '保存失败')
     } finally {
@@ -136,6 +148,14 @@ export default function DesignerPage() {
         </div>
       </header>
       {error && <div className="bg-red-50 px-4 py-1 text-sm text-red-600">{error}</div>}
+      {draftRestored && (
+        <div className="flex items-center justify-between border-b border-amber-200 bg-amber-50 px-4 py-1.5 text-sm text-amber-700">
+          <span>已恢复未保存的草稿（上次预览时的修改）</span>
+          <button onClick={discardDraft} className="font-medium hover:underline">
+            放弃草稿，重新加载已保存版本
+          </button>
+        </div>
+      )}
       <div className="flex flex-1 overflow-hidden">
         <Palette />
         <main className="flex-1 overflow-auto bg-gray-100 p-6" onClick={() => select(null)}>
