@@ -109,7 +109,8 @@ export const registry: Record<string, ComponentDef> = {
     render: (props) => (
       <button
         type="button"
-        className="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
+        // w-fit + self-start：避免被 flex 容器拉伸（画布/预览表现一致）
+        className="w-fit self-start rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
       >
         {String(props.text ?? '按钮')}
       </button>
