@@ -52,6 +52,35 @@ export const registry: Record<string, ComponentDef> = {
       </div>
     ),
   },
+  row: {
+    type: 'row',
+    name: '行',
+    category: '布局',
+    canHaveChildren: true,
+    defaultProps: { gap: 8 },
+    inspector: [{ prop: 'gap', label: '间距', control: 'number' }],
+    render: (props, children) => (
+      <div className="flex flex-row" style={{ gap: typeof props.gap === 'number' ? props.gap : 8 }}>
+        {children}
+      </div>
+    ),
+  },
+  col: {
+    type: 'col',
+    name: '列',
+    category: '布局',
+    canHaveChildren: true,
+    defaultProps: { span: 12 },
+    inspector: [{ prop: 'span', label: '宽度（1-12 格）', control: 'number' }],
+    render: (props, children) => {
+      const span = Math.min(Math.max(Number(props.span) || 12, 1), 12)
+      return (
+        <div className="min-w-0" style={{ flexBasis: `${(span / 12) * 100}%` }}>
+          {children}
+        </div>
+      )
+    },
+  },
   title: {
     type: 'title',
     name: '标题',
@@ -85,5 +114,14 @@ export const registry: Record<string, ComponentDef> = {
         {String(props.text ?? '按钮')}
       </button>
     ),
+  },
+  divider: {
+    type: 'divider',
+    name: '分割线',
+    category: '基础',
+    canHaveChildren: false,
+    defaultProps: {},
+    inspector: [],
+    render: () => <hr className="my-1 border-gray-200" />,
   },
 }
