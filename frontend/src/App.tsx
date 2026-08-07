@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import AdminLayout from './pages/admin/AdminLayout'
 import AppsPage from './pages/admin/AppsPage'
 import AppDetailPage from './pages/admin/AppDetailPage'
+import DesignerPage from './pages/admin/designer/DesignerPage'
 import RuntimePage from './pages/runtime/RuntimePage'
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -30,6 +31,14 @@ export default function App() {
           <Route path="apps" element={<AppsPage />} />
           <Route path="apps/:appId" element={<AppDetailPage />} />
         </Route>
+        <Route
+          path="/admin/apps/:appId/design/:pageId"
+          element={
+            <RequireAuth>
+              <DesignerPage />
+            </RequireAuth>
+          }
+        />
         <Route
           path="/app/:appId/:path?"
           element={

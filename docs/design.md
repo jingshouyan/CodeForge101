@@ -260,10 +260,10 @@ src/
 
 **P1 管理后台**：
 
-| 阶段 | 内容 | 验证标准 |
-| --- | --- | --- |
-| M1 | 工程骨架 + 认证 + 应用/页面 CRUD + 静态渲染器 | 能登录、建应用，手写 JSON 页面可渲染 |
-| M2 | 设计器：拖拽画布 + 属性面板 + 大纲树 | 纯静态页面可视化搭建 |
+| 阶段 | 内容 | 验证标准 | 状态 |
+| --- | --- | --- | --- |
+| M1 | 工程骨架 + 认证 + 应用/页面 CRUD + 静态渲染器 | 能登录、建应用，手写 JSON 页面可渲染 | ✅ |
+| M2 | 设计器：拖拽画布 + 属性面板 + 大纲树 | 纯静态页面可视化搭建 | ✅ |
 | M3 | 数据模型 + 动态 CRUD（系统字段/软删除/可见性配置） | 模型可建可查，API 安全可用 |
 | M4 | 表单/表格绑定 + 弹窗编辑 + 筛选联动 | 搭出可增删改查的订单管理页 |
 | M5 | 审批流：定义配置 + 实例/任务 + 表单提交接入 | 订单表单可发起审批，审批人通过/驳回 |
@@ -339,3 +339,11 @@ src/
 - 无 token 访问 → 401
 - 前端 `tsc + vite build` 通过；dev server 200；`/api` 代理链路通
 - 浏览器人工验证：http://localhost:5173（admin / admin123）
+
+### 12.5 落地记录（M2）
+
+- 注册表迁移至 `src/components/registry.tsx`（设计器/渲染器共享），组件定义含 category / defaultProps / inspector，属性面板按配置自动生成
+- 新增 `src/designer/tree.ts` 纯函数树操作（12 个单测，vitest）+ `src/designer/store.ts`（zustand，undo/redo 历史栈）
+- 设计器 `/admin/apps/:appId/design/:pageId`：Palette（拖拽+点击添加）/ Canvas（dnd-kit，新增/移动/选中/Delete 删除）/ Inspector（高级项折叠）/ Outline
+- 快捷键：Delete 删除选中，Ctrl+Z / Ctrl+Shift+Z 撤销重做；保存走页面乐观锁，预览跳运行时
+- M2 未做：拖拽插入位置指示（当前统一追加到容器末尾）、组件间连线/事件配置（M4）、发布版本（M6）

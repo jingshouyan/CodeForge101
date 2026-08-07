@@ -142,6 +142,9 @@ export default function AppDetailPage() {
                 <td className="px-4 py-2 text-gray-500">{p.version}</td>
                 <td className="px-4 py-2 text-gray-500">{new Date(p.updatedAt).toLocaleString()}</td>
                 <td className="px-4 py-2 text-right">
+                  <Link to={`/admin/apps/${app.id}/design/${p.id}`} className="mr-3 font-medium text-blue-600 hover:underline">
+                    设计
+                  </Link>
                   <button onClick={() => onEditPage(p)} className="mr-3 text-blue-600 hover:underline">
                     编辑 JSON
                   </button>
