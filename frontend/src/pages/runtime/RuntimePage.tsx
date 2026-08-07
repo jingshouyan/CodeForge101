@@ -1,16 +1,21 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { getApp } from '../../api/apps'
 import { listPages } from '../../api/pages'
 import type { App, AppPage } from '../../api/types'
 import type { PageSchema } from '../../schema/types'
+import { readDraft } from '../../designer/draft'
 import { RuntimeRenderer } from '../../runtime/RuntimeRenderer'
 
 export default function RuntimePage() {
   const { appId, path: pathParam } = useParams()
+  const [searchParams] = useSearchParams()
+  const isDraftPreview = searchParams.get('draft') === '1'
   const [app, setApp] = useState<App | null>(null)
   const [pages, setPages] = useState<AppPage[]>([])
+  const [previewPage, setPreviewPage] = useState<AppPage | null>(null)
   const [schema, setSchema] = useState<PageSchema | null>(null)
+  const [usingDraft, setUsingDraft] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -22,16 +27,21 @@ export default function RuntimePage() {
         setPages(pagesRes)
         const target =
           pagesRes.find((p) => p.path === pathParam) ?? pagesRes.find((p) => p.path !== undefined) ?? null
+        setPreviewPage(target)
         if (target) {
-          setSchema(JSON.parse(target.schema))
+          // 设计器草稿预览：?draft=1 且存在未保存草稿时优先渲染，否则回退服务端 schema
+          const draft = isDraftPreview ? readDraft(appId, String(target.id)) : null
+          setSchema(draft ?? JSON.parse(target.schema))
+          setUsingDraft(draft !== null)
         } else {
           setSchema(null)
+          setUsingDraft(false)
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : '加载失败')
       }
     })()
-  }, [appId, pathParam])
+  }, [appId, pathParam, isDraftPreview])
 
   if (error) return <p className="p-6 text-sm text-red-600">{error}</p>
 
@@ -60,6 +70,14 @@ export default function RuntimePage() {
           管理后台 →
         </Link>
       </header>
+      {usingDraft && previewPage && (
+        <div className="flex items-center justify-between border-b border-amber-200 bg-amber-50 px-6 py-2 text-sm text-amber-700">
+          <span>草稿预览：包含设计器中未保存的修改</span>
+          <Link to={`/admin/apps/${appId}/design/${previewPage.id}`} className="font-medium hover:underline">
+            返回设计器
+          </Link>
+        </div>
+      )}
       <main className="mx-auto max-w-4xl p-6">
         {schema ? (
           <div className="rounded-lg border bg-white p-6 shadow-sm">

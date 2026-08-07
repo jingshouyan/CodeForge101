@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { getApp } from '../../../api/apps'
 import { getPage, updatePage } from '../../../api/pages'
 import type { App, AppPage } from '../../../api/types'
 import { useDesignerStore } from '../../../designer/store'
+import { clearDraft, writeDraft } from '../../../designer/draft'
 import { Palette } from './Palette'
 import { Canvas } from './Canvas'
 import { Inspector } from './Inspector'
@@ -72,11 +73,18 @@ export default function DesignerPage() {
       })
       setPage(updated)
       setSavedAt(Date.now())
+      clearDraft(appId!, String(page.id))
     } catch (err) {
       setError(err instanceof Error ? err.message : '保存失败')
     } finally {
       setSaving(false)
     }
+  }
+
+  function onPreview() {
+    if (!root || !appId || !page) return
+    writeDraft(appId, String(page.id), { version: '1.0', root })
+    navigate(`/app/${appId}/${page.path}?draft=1`)
   }
 
   if (error && !app) {
@@ -111,12 +119,12 @@ export default function DesignerPage() {
             重做
           </button>
           {page && (
-            <Link
-              to={`/app/${appId}/${page.path}`}
+            <button
+              onClick={onPreview}
               className="rounded border border-blue-200 px-2 py-1 text-sm text-blue-600 hover:bg-blue-50"
             >
               预览
-            </Link>
+            </button>
           )}
           <button
             onClick={onSave}
