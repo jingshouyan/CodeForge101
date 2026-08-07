@@ -8,6 +8,9 @@
 *.so
 *.dylib
 
+# Go debugger (delve) temp binaries
+__debug_bin*
+
 # Test binary, built with `go test -c`
 *.test
 
